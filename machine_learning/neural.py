@@ -37,8 +37,8 @@ class network(list):
     def score(self, X):
         return self.forward(X)[1][-1][:-1]
 
-    def train(self, data, rate=.05, tol=1e-3):
-        while sum(self.learn(X, T) for X, T in data) > tol:
+    def train(self, data, tol=1e-3, **kwds):
+        while sum(self.learn(X, T, **kwds) for X, T in data) > tol:
             pass
 
 if __name__ == '__main__':
