@@ -15,10 +15,11 @@ class Trader(decision.MDP):
             b = cut(.4 + l, .01, .98)
             return {p * (1 + gamma): a, p / (1 + gamma): b, p: 1 - a - b}
         prices = set(reduce(lambda a, b: a + [a[-2] / b, a[-1] * b], [1 + gamma] * N, [1, 1]))
+        pdists = dict((p, nprice(p)) for p in prices)
         self.T = T
         self.X = lambda t: [(q, p) for q in range(qmin, qmax) for p in prices]
         self.U = lambda t, (q, p): range(qmin - q, qmax - q + 1)
-        self.W = lambda t, (q, p): nprice(p)
+        self.W = lambda t, (q, p): pdists[p]
 
     def step(self, t, (q, p), u, p_):
         return q + u, p_
@@ -60,4 +61,4 @@ def plot(policy, T=0):
 
 if __name__ == '__main__':
     for trader in (Trader, TraderSH, TraderLin, TraderSHNL):
-        plot(dict(trader(T=10).policy()))
+        plot(dict(trader(T=25).policy()))

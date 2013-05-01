@@ -16,7 +16,6 @@ Our old friend, inventory:
 >>> [t for t, p in mu.items() if [u for x, (v, u) in p.items()] == [4, 3, 0, 0, 0, 0, 0]] == range(T - 2)
 True
 """
-import markov
 
 class MDP(object):
     def __init__(self, T, X, U=None, W=None):
@@ -33,8 +32,8 @@ class MDP(object):
 
     def policy(self, p={}):
         c = lambda t, x, u, W: g(t, x, u, W) + E(t, x, u, W)
-        g = lambda t, x, u, W: markov.expected(W, lambda w: self.cost(t, x, u, w), W)
-        E = lambda t, x, u, W: markov.expected(W, lambda w: V(t, self.step(t, x, u, w)), W)
+        g = lambda t, x, u, W: sum(self.cost(t, x, u, w) * p for w, p in W.items())
+        E = lambda t, x, u, W: sum(V(t, self.step(t, x, u, w)) * p for w, p in W.items())
         V = lambda t, x: p.get(x, (0, None))[0]
         for t in reversed(xrange(self.T)):
             p = dict((x, min((c(t, x, u, self.W(t, x)), u) for u in self.U(t, x))) for x in self.X(t))
