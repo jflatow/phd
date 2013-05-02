@@ -9,42 +9,42 @@ cut = lambda v, m, M: min(max(v, m), M)
 
 class Trader(decision.MDP):
     def __init__(self, T=250, qmin=-5, qmax=15, gamma=.005, N=20):
-        def nprice(p):
-            l = 2 * math.log(p)
+        def transition(n):
+            l = 2 * math.log(prices[n])
             a = cut(.4 - l, .01, .98)
             b = cut(.4 + l, .01, .98)
-            return {p * (1 + gamma): a, p / (1 + gamma): b, p: 1 - a - b}
-        prices = set(reduce(lambda a, b: a + [a[-2] / b, a[-1] * b], [1 + gamma] * N, [1, 1]))
-        pdists = dict((p, nprice(p)) for p in prices)
+            return {n + 1: a, n - 1: b, n: 1 - a - b}
+        prices = self.prices = dict((n, (1 + gamma) ** n) for n in range(-N, N + 1))
+        ptrans = self.ptrans = dict((n, transition(n)) for n in range(-N, N + 1))
         self.T = T
-        self.X = lambda t: [(q, p) for q in range(qmin, qmax) for p in prices]
-        self.U = lambda t, (q, p): range(qmin - q, qmax - q + 1)
-        self.W = lambda t, (q, p): pdists[p]
+        self.X = lambda t: [(q, n) for q in range(qmin, qmax) for n in range(-N, N + 1)]
+        self.U = lambda t, (q, n): range(qmin - q, qmax - q + 1)
+        self.W = lambda t, (q, n): ptrans[n]
 
-    def step(self, t, (q, p), u, p_):
-        return q + u, p_
+    def step(self, t, (q, n), u, n_):
+        return q + u, n_
 
-    def cost(self, t, (q, p), u, p_):
+    def cost(self, t, (q, n), u, n_):
         if t < self.T - 1:
-            return u * p
+            return u * self.prices[n]
         return 0 if q + u == 0 else inf
 
 class TraderSH(Trader):
-    def cost(self, t, (q, p), u, p_):
+    def cost(self, t, (q, n), u, n_):
         if t < self.T - 1:
-            return u * p + (.005 if q < 0 else 0)
+            return u * self.prices[n] + (.005 if q < 0 else 0)
         return 0 if q + u == 0 else inf
 
 class TraderLin(Trader):
-    def cost(self, t, (q, p), u, p_):
+    def cost(self, t, (q, n), u, n_):
         if t < self.T - 1:
-            return u * p + (.005 * abs(u))
+            return u * self.prices[n] + (.005 * abs(u))
         return 0 if q + u == 0 else inf
 
 class TraderSHNL(Trader):
-    def cost(self, t, (q, p), u, p_):
+    def cost(self, t, (q, n), u, n_):
         if t < self.T - 1:
-            return u * p + (.0001 if q < 0 else 0) + (.005 * abs(u) ** 1.5)
+            return u * self.prices[n] + (.0001 if q < 0 else 0) + (.005 * abs(u) ** 1.5)
         return 0 if q + u == 0 else inf
 
 def plot(policy, T=0):
