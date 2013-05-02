@@ -16,10 +16,11 @@ class Trader(decision.MDP):
             return {n + 1: a, n - 1: b, n: 1 - a - b}
         prices = self.prices = dict((n, (1 + gamma) ** n) for n in range(-N, N + 1))
         ptrans = self.ptrans = dict((n, transition(n)) for n in range(-N, N + 1))
+        states = [(q, n) for q in range(qmin, qmax) for n in range(-N, N + 1)]
         self.T = T
-        self.X = lambda t: [(q, n) for q in range(qmin, qmax) for n in range(-N, N + 1)]
+        self.X = lambda t: states
         self.U = lambda t, (q, n): range(qmin - q, qmax - q + 1)
-        self.W = lambda t, (q, n): ptrans[n]
+        self.W = lambda t, (q, n), u: ptrans[n]
 
     def step(self, t, (q, n), u, n_):
         return q + u, n_
