@@ -31,10 +31,10 @@ class MDP(object):
         """Return a real or infinite stage cost."""
 
     def policy(self, p={}):
-        c = lambda t, x, u, W: g(t, x, u, W) + E(t, x, u, W)
-        g = lambda t, x, u, W: sum(self.cost(t, x, u, w) * p for w, p in W.items())
-        E = lambda t, x, u, W: sum(V(t, self.step(t, x, u, w)) * p for w, p in W.items())
+        f = self.step
+        g = self.cost
+        E = lambda t, x, u, W: sum((g(t, x, u, w) + V(t, f(t, x, u, w))) * p for w, p in W.items())
         V = lambda t, x: p.get(x, (0, None))[0]
         for t in reversed(xrange(self.T)):
-            p = dict((x, min((c(t, x, u, self.W(t, x, u)), u) for u in self.U(t, x))) for x in self.X(t))
+            p = dict((x, min((E(t, x, u, self.W(t, x, u)), u) for u in self.U(t, x))) for x in self.X(t))
             yield t, p
