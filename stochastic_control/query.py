@@ -39,13 +39,13 @@ class Designer(decision.MDP):
             return self.tests[k][2]
         return self.tests[k][2] + self.r * min(n_, self.N - n_)
 
-def plot(policy, T=0):
+def plot(policy, T=0, alpha=.1):
     import mpl_toolkits.mplot3d
     import pylab
     f = pylab.figure()
     o = policy[T]
     a = f.add_subplot(111, projection='3d')
-    a.scatter([n for n in o], [u for v, u in o.values()], [v for v, u in o.values()], alpha=.1)
+    a.scatter([n for n in o], [u for v, u in o.values()], [v for v, u in o.values()], alpha=alpha)
     a.set_title('T = %s' % T)
     a.set_xlabel('State')
     a.set_ylabel('Test')
