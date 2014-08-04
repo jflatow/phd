@@ -42,7 +42,7 @@ class network(list):
             pass
 
 if __name__ == '__main__':
-    xor = [([0,0], [1]), ([0,1], [1]), ([1,0], [1]), ([1,1], [-1])]
+    xor = [([0,0], [-1]), ([0,1], [1]), ([1,0], [1]), ([1,1], [-1])]
     net = network(2, 2, 1)
     net.train(xor)
     for pat, exp in xor:
